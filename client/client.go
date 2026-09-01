@@ -16,13 +16,11 @@ func main() {
 	}
 	defer conn.Close()
 
-	//	fmt.Printf("calc> ")
-	//	scanner := bufio.NewScanner(os.Stdin)
+	scanner := bufio.NewScanner(os.Stdin)
 
 	for {
 
 		fmt.Printf("calc> ")
-		scanner := bufio.NewScanner(os.Stdin)
 
 		if !scanner.Scan() {
 			if err := scanner.Err(); err != nil {
@@ -31,7 +29,6 @@ func main() {
 			break
 		}
 
-		// scanner.Scan()
 		text := scanner.Text()
 
 		if text == "SAIR" {
@@ -54,7 +51,7 @@ func main() {
 			return
 		}
 
-		fmt.Printf("Servidor (%d bytes): %s\n", n, string(buf[:n]))
+		fmt.Printf("Resultado: %s\n", string(buf[:n]))
 
 	}
 }
