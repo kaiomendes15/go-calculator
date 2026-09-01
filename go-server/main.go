@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net"
+	"strings"
 )
 
 func main() {
@@ -43,11 +44,28 @@ func handleClient(conn net.Conn) {
 			break
 		}
 
-		fmt.Printf("Recebido %d byte: %s", n, string(buf[:n]))
+		fmt.Printf("Recebido %d byte: %s\n", n, string(buf[:n]))
+		operation, err := validateOperation(string(buf[:n]))
+		if err != nil {
+			fmt.Printf("Erro: %v\n", err)
+			break
+		}
 
 		_, err = conn.Write(buf[:n])
 		if err != nil {
 			fmt.Println("Erro ao escrever para o cliente: ", err)
 		}
 	}
+}
+
+func validateOperation(input string) ([]string, error) {
+	operation := strings.Split(input, " ")
+	fmt.Printf("%q\n", operation)
+	fmt.Printf("%d\n", len(operation))
+	
+	if len(operation) < 3 {
+		return operation, fmt.Errorf("Comando de input inválido: %q\n", operation)
+	} 
+
+	return operation, nil
 }
