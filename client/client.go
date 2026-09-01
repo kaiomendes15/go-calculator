@@ -1,49 +1,37 @@
 package main
 
 import (
-    "bufio"
-    "fmt"
-    "log"
-    "net"
-    "strings"
+	"fmt"
+	"net"
 )
 
 func main() {
 
-    listener, err := net.Listen("tcp", ":8090")
-    if err != nil {
-        log.Fatal("Error listening:", err)
-    }
+	conn, err := net.Dial("tcp", "127.0.0.1:8090")
+	if err != nil {
+		fmt.Println("Erro ao conectar ao servidor:", err)
+		return
+	}
+	defer conn.Close()
 
-    defer listener.Close()
+	message := "Olá, servidor Echo com Buffer em Go!\n"
 
-    for {
+	_, err = conn.Write([]byte(message))
+	if err != nil {
+		fmt.Println("Erro ao enviar dados:", err)
+		return
+	}
 
-        conn, err := listener.Accept()
-        if err != nil {
-            log.Println("Error accepting conn:", err)
-            continue
-        }
+	fmt.Printf("Enviado: %s", message)
 
-        go handleConnection(conn)
-    }
-}
+	buf := make([]byte, 1024)
 
-func handleConnection(conn net.Conn) {
+	n, err := conn.Read(buf)
+	if err != nil {
+		fmt.Println("Erro ao ler resposta do servidor:", err)
+		return
+	}
 
-    defer conn.Close()
+	fmt.Printf("Echo recebido do servidor (%d bytes): %s", n, string(buf[:n]))
 
-    reader := bufio.NewReader(conn)
-    message, err := reader.ReadString('\n')
-    if err != nil {
-        log.Printf("Read error: %v", err)
-        return
-    }
-
-    ackMsg := strings.ToUpper(strings.TrimSpace(message))
-    response := fmt.Sprintf("ACK: %s\n", ackMsg)
-    _, err = conn.Write([]byte(response))
-    if err != nil {
-        log.Printf("Server write error: %v", err)
-    }
 }
