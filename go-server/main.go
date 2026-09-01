@@ -59,6 +59,7 @@ func handleClient(conn net.Conn) {
 			break
 		}
 		fmt.Printf("Operação %s sobre %v\n", operation, values)
+		switchOperation(operation, values)
 
 		_, err = conn.Write(buf[:n])
 		if err != nil {
@@ -72,14 +73,14 @@ func validateOperation(input string) ([]string, error) {
 	fmt.Printf("%q\n", command)
 	fmt.Printf("%d\n", len(command))
 
-	if len(command) < 3 {
-		return command, fmt.Errorf("comando de input inválido: %q", command)
+	if !(len(command) == 3) {
+		return command, fmt.Errorf("formato invalido (use: OPERACAO NUM1 NUM2)")
 	}
 
 	validOperations := []string{"SOMA", "SUB", "MUL", "DIV"}
 	operation := strings.ToUpper(command[0])
 	if !slices.Contains(validOperations, operation) {
-		return command, fmt.Errorf("operação inválida: %q", operation)
+		return command, fmt.Errorf("comando desconhecido: %q", operation)
 	}
 
 	command[0] = operation
@@ -109,7 +110,7 @@ func sum(values []float64) (float64) {
 
 func div(values []float64) (float64, error) {
 	if values[1] == 0 {
-		return 0, fmt.Errorf("Divisão por zero!")
+		return 0, fmt.Errorf("divisão por zero!")
 	}
 
 	div := values[0] / values[1]
