@@ -50,7 +50,7 @@ func main() {
 			return
 		}
 
-		fmt.Printf("Echo recebido do servidor (%d bytes): %s\n", n, string(buf[:n]))
+		fmt.Printf("Servidor (%d bytes): %s\n", n, string(buf[:n]))
 
 	}
 }

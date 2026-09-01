@@ -49,17 +49,20 @@ func handleClient(conn net.Conn) {
 		fmt.Printf("Recebido %d byte: %s\n", n, string(buf[:n]))
 		command, err := validateOperation(string(buf[:n]))
 		if err != nil {
-			fmt.Printf("Erro: %v\n", err)
-			break
+			responderErro(conn, err)
+			continue
 		}
 
 		operation, values, err := parseOperation(command)
 		if err != nil {
-			fmt.Printf("Erro: %v\n", err)
-			break
+			responderErro(conn, err)
+			continue
 		}
 		fmt.Printf("Operação %s sobre %v\n", operation, values)
-		switchOperation(operation, values)
+		if err := switchOperation(operation, values); err != nil {
+			responderErro(conn, err)
+			continue
+		}
 
 		_, err = conn.Write(buf[:n])
 		if err != nil {
@@ -103,7 +106,7 @@ func parseOperation(command []string) (string, []float64, error) {
 	return operation, values, nil
 }
 
-func sum(values []float64) (float64) {
+func sum(values []float64) float64 {
 	sum := values[0] + values[1]
 	return sum
 }
@@ -117,24 +120,32 @@ func div(values []float64) (float64, error) {
 	return div, nil
 }
 
-func switchOperation(operation string, values []float64) {
+func switchOperation(operation string, values []float64) error {
 
 	switch operation {
-		case "SOMA":
-			resultado := sum(values)
-			fmt.Printf("Resultado da soma => %f\n", resultado)
-			return
-		case "SUB":
-			// TO DO
-		case "MUL":
-			// TO DO
-		case "DIV":
-			resultado, err := div(values)
-			if err != nil {
-				fmt.Println(err)
-				return
-			}
+	case "SOMA":
+		resultado := sum(values)
+		fmt.Printf("Resultado da soma => %f\n", resultado)
+		return nil
+	case "SUB":
+		// TO DO
+	case "MUL":
+		// TO DO
+	case "DIV":
+		resultado, err := div(values)
+		if err != nil {
+			return err
+		}
 
-			fmt.Printf("Resultado da divisão => %f\n", resultado)
+		fmt.Printf("Resultado da divisão => %f\n", resultado)
+	}
+
+	return nil
+}
+
+func responderErro(conn net.Conn, erro error) {
+	fmt.Printf("Erro: %v\n", erro)
+	if _, err := conn.Write([]byte("ERRO: " + erro.Error())); err != nil {
+		fmt.Println("Erro ao escrever para o cliente: ", err)
 	}
 }
