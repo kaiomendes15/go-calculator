@@ -16,9 +16,13 @@ func main() {
 	}
 	defer conn.Close()
 
-	scanner := bufio.NewScanner(os.Stdin)
+	//	fmt.Printf("calc> ")
+	//	scanner := bufio.NewScanner(os.Stdin)
 
 	for {
+
+		fmt.Printf("calc> ")
+		scanner := bufio.NewScanner(os.Stdin)
 
 		if !scanner.Scan() {
 			if err := scanner.Err(); err != nil {
@@ -30,7 +34,7 @@ func main() {
 		// scanner.Scan()
 		text := scanner.Text()
 
-		if text == "sair" {
+		if text == "SAIR" {
 			break
 		}
 
