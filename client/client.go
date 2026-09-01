@@ -27,7 +27,7 @@ func main() {
 			break
 		}
 
-		scanner.Scan()
+		// scanner.Scan()
 		text := scanner.Text()
 
 		if text == "sair" {
@@ -50,7 +50,7 @@ func main() {
 			return
 		}
 
-		fmt.Printf("Echo recebido do servidor (%d bytes): %s", n, string(buf[:n]))
+		fmt.Printf("Echo recebido do servidor (%d bytes): %s\n", n, string(buf[:n]))
 
 	}
 }
