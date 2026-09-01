@@ -101,3 +101,39 @@ func parseOperation(command []string) (string, []float64, error) {
 
 	return operation, values, nil
 }
+
+func sum(values []float64) (float64) {
+	sum := values[0] + values[1]
+	return sum
+}
+
+func div(values []float64) (float64, error) {
+	if values[1] == 0 {
+		return 0, fmt.Errorf("Divisão por zero!")
+	}
+
+	div := values[0] / values[1]
+	return div, nil
+}
+
+func switchOperation(operation string, values []float64) {
+
+	switch operation {
+		case "SOMA":
+			resultado := sum(values)
+			fmt.Printf("Resultado da soma => %f\n", resultado)
+			return
+		case "SUB":
+			// TO DO
+		case "MUL":
+			// TO DO
+		case "DIV":
+			resultado, err := div(values)
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+
+			fmt.Printf("Resultado da divisão => %f\n", resultado)
+	}
+}
