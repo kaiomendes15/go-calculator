@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"net"
+	"slices"
+	"strconv"
 	"strings"
 )
 
@@ -45,11 +47,18 @@ func handleClient(conn net.Conn) {
 		}
 
 		fmt.Printf("Recebido %d byte: %s\n", n, string(buf[:n]))
-		operation, err := validateOperation(string(buf[:n]))
+		command, err := validateOperation(string(buf[:n]))
 		if err != nil {
 			fmt.Printf("Erro: %v\n", err)
 			break
 		}
+
+		operation, values, err := parseOperation(command)
+		if err != nil {
+			fmt.Printf("Erro: %v\n", err)
+			break
+		}
+		fmt.Printf("Operação %s sobre %v\n", operation, values)
 
 		_, err = conn.Write(buf[:n])
 		if err != nil {
@@ -59,13 +68,36 @@ func handleClient(conn net.Conn) {
 }
 
 func validateOperation(input string) ([]string, error) {
-	operation := strings.Split(input, " ")
-	fmt.Printf("%q\n", operation)
-	fmt.Printf("%d\n", len(operation))
-	
-	if len(operation) < 3 {
-		return operation, fmt.Errorf("Comando de input inválido: %q\n", operation)
-	} 
+	command := strings.Split(input, " ")
+	fmt.Printf("%q\n", command)
+	fmt.Printf("%d\n", len(command))
 
-	return operation, nil
+	if len(command) < 3 {
+		return command, fmt.Errorf("comando de input inválido: %q", command)
+	}
+
+	validOperations := []string{"SOMA", "SUB", "MUL", "DIV"}
+	operation := strings.ToUpper(command[0])
+	if !slices.Contains(validOperations, operation) {
+		return command, fmt.Errorf("operação inválida: %q", operation)
+	}
+
+	command[0] = operation
+
+	return command, nil
+}
+
+func parseOperation(command []string) (string, []float64, error) {
+	operation := command[0]
+
+	values := make([]float64, 0, len(command)-1)
+	for _, raw := range command[1:] {
+		value, err := strconv.ParseFloat(raw, 64)
+		if err != nil {
+			return operation, nil, fmt.Errorf("operando inválido %q: %w", raw, err)
+		}
+		values = append(values, value)
+	}
+
+	return operation, values, nil
 }
