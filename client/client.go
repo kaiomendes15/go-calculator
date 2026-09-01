@@ -40,7 +40,7 @@ func main() {
 			return
 		}
 
-		fmt.Printf("Enviado: %s", text)
+		fmt.Printf("Enviado: %s\n", text)
 
 		buf := make([]byte, 1024)
 

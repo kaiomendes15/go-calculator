@@ -3,6 +3,9 @@ package main
 import (
 	"fmt"
 	"net"
+	"slices"
+	"strconv"
+	"strings"
 )
 
 func main() {
@@ -43,11 +46,95 @@ func handleClient(conn net.Conn) {
 			break
 		}
 
-		fmt.Printf("Recebido %d byte: %s", n, string(buf[:n]))
+		fmt.Printf("Recebido %d byte: %s\n", n, string(buf[:n]))
+		command, err := validateOperation(string(buf[:n]))
+		if err != nil {
+			fmt.Printf("Erro: %v\n", err)
+			break
+		}
+
+		operation, values, err := parseOperation(command)
+		if err != nil {
+			fmt.Printf("Erro: %v\n", err)
+			break
+		}
+		fmt.Printf("Operação %s sobre %v\n", operation, values)
+		switchOperation(operation, values)
 
 		_, err = conn.Write(buf[:n])
 		if err != nil {
 			fmt.Println("Erro ao escrever para o cliente: ", err)
 		}
+	}
+}
+
+func validateOperation(input string) ([]string, error) {
+	command := strings.Split(input, " ")
+	fmt.Printf("%q\n", command)
+	fmt.Printf("%d\n", len(command))
+
+	if !(len(command) == 3) {
+		return command, fmt.Errorf("formato invalido (use: OPERACAO NUM1 NUM2)")
+	}
+
+	validOperations := []string{"SOMA", "SUB", "MUL", "DIV"}
+	operation := strings.ToUpper(command[0])
+	if !slices.Contains(validOperations, operation) {
+		return command, fmt.Errorf("comando desconhecido: %q", operation)
+	}
+
+	command[0] = operation
+
+	return command, nil
+}
+
+func parseOperation(command []string) (string, []float64, error) {
+	operation := command[0]
+
+	values := make([]float64, 0, len(command)-1)
+	for _, raw := range command[1:] {
+		value, err := strconv.ParseFloat(raw, 64)
+		if err != nil {
+			return operation, nil, fmt.Errorf("operando inválido %q: %w", raw, err)
+		}
+		values = append(values, value)
+	}
+
+	return operation, values, nil
+}
+
+func sum(values []float64) (float64) {
+	sum := values[0] + values[1]
+	return sum
+}
+
+func div(values []float64) (float64, error) {
+	if values[1] == 0 {
+		return 0, fmt.Errorf("divisão por zero!")
+	}
+
+	div := values[0] / values[1]
+	return div, nil
+}
+
+func switchOperation(operation string, values []float64) {
+
+	switch operation {
+		case "SOMA":
+			resultado := sum(values)
+			fmt.Printf("Resultado da soma => %f\n", resultado)
+			return
+		case "SUB":
+			// TO DO
+		case "MUL":
+			// TO DO
+		case "DIV":
+			resultado, err := div(values)
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+
+			fmt.Printf("Resultado da divisão => %f\n", resultado)
 	}
 }
