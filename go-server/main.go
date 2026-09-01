@@ -120,6 +120,16 @@ func div(values []float64) (float64, error) {
 	return div, nil
 }
 
+func mul(values []float64) float64 {
+	mul := values[0] * values[1]
+	return mul
+}
+
+func sub(values []float64) float64 {
+	sub := values[0] - values[1]
+	return sub
+}
+
 func switchOperation(operation string, values []float64) error {
 
 	switch operation {
@@ -127,10 +137,17 @@ func switchOperation(operation string, values []float64) error {
 		resultado := sum(values)
 		fmt.Printf("Resultado da soma => %f\n", resultado)
 		return nil
+
 	case "SUB":
-		// TO DO
+		resultado := sub(values)
+		fmt.Printf("Resultado da subtração => %f\n", resultado)
+		return nil
+
 	case "MUL":
-		// TO DO
+		resultado := mul(values)
+		fmt.Printf("Resultado da multiplicação => %f\n", resultado)
+		return nil
+
 	case "DIV":
 		resultado, err := div(values)
 		if err != nil {
