@@ -89,7 +89,3 @@ calc> SAIR
 
 O comando `SAIR` fecha a conexão e encerra o cliente. Você pode abrir vários
 clientes ao mesmo tempo — o servidor atende todos simultaneamente.
-
-## 👥 Autores
-
-Trabalho em dupla — Redes de Computadores.
