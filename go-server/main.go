@@ -76,9 +76,13 @@ func handleClient(conn net.Conn) {
 }
 
 func validateOperation(input string) ([]string, error) {
-	command := strings.Split(input, " ")
+	command := strings.Fields(input)
 	fmt.Printf("%q\n", command)
 	fmt.Printf("%d\n", len(command))
+
+	if len(command) == 0 {
+		return command, fmt.Errorf("comando vazio")
+	}
 
 	validOperations := []string{"SOMA", "SUB", "MUL", "DIV"}
 	operation := strings.ToUpper(command[0])
