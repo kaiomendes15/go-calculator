@@ -40,6 +40,7 @@ func handleClient(conn net.Conn) {
 	buf := make([]byte, 1024)
 
 	for {
+
 		n, err := conn.Read(buf)
 		if err != nil {
 			fmt.Printf("Cliente desconectado ou erro de leitura: %v\n", err)
@@ -59,15 +60,18 @@ func handleClient(conn net.Conn) {
 			continue
 		}
 		fmt.Printf("Operação %s sobre %v\n", operation, values)
-		if err := switchOperation(operation, values); err != nil {
+		resultado, err := switchOperation(operation, values)
+		if err != nil {
 			responderErro(conn, err)
 			continue
 		}
 
-		_, err = conn.Write(buf[:n])
+		resposta := strconv.FormatFloat(resultado, 'f', -1, 64)
+		_, err = conn.Write([]byte(resposta))
 		if err != nil {
 			fmt.Println("Erro ao escrever para o cliente: ", err)
 		}
+
 	}
 }
 
@@ -76,14 +80,14 @@ func validateOperation(input string) ([]string, error) {
 	fmt.Printf("%q\n", command)
 	fmt.Printf("%d\n", len(command))
 
-	if !(len(command) == 3) {
-		return command, fmt.Errorf("formato invalido (use: OPERACAO NUM1 NUM2)")
-	}
-
 	validOperations := []string{"SOMA", "SUB", "MUL", "DIV"}
 	operation := strings.ToUpper(command[0])
 	if !slices.Contains(validOperations, operation) {
 		return command, fmt.Errorf("comando desconhecido: %q", operation)
+	}
+
+	if len(command) != 3 {
+		return command, fmt.Errorf("formato invalido (use: OPERACAO NUM1 NUM2)")
 	}
 
 	command[0] = operation
@@ -130,34 +134,36 @@ func sub(values []float64) float64 {
 	return sub
 }
 
-func switchOperation(operation string, values []float64) error {
+func switchOperation(operation string, values []float64) (float64, error) {
+
+	resultado := 0.0
 
 	switch operation {
 	case "SOMA":
-		resultado := sum(values)
+		resultado = sum(values)
 		fmt.Printf("Resultado da soma => %f\n", resultado)
-		return nil
+		return resultado, nil
 
 	case "SUB":
-		resultado := sub(values)
+		resultado = sub(values)
 		fmt.Printf("Resultado da subtração => %f\n", resultado)
-		return nil
+		return resultado, nil
 
 	case "MUL":
-		resultado := mul(values)
+		resultado = mul(values)
 		fmt.Printf("Resultado da multiplicação => %f\n", resultado)
-		return nil
+		return resultado, nil
 
 	case "DIV":
 		resultado, err := div(values)
 		if err != nil {
-			return err
+			return resultado, err
 		}
 
 		fmt.Printf("Resultado da divisão => %f\n", resultado)
 	}
 
-	return nil
+	return resultado, nil
 }
 
 func responderErro(conn net.Conn, erro error) {
