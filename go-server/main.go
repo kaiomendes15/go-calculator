@@ -165,6 +165,7 @@ func switchOperation(operation string, values []float64) (float64, error) {
 		}
 
 		fmt.Printf("Resultado da divisão => %f\n", resultado)
+		return resultado, nil
 	}
 
 	return resultado, nil
